@@ -1,0 +1,112 @@
+/* Reset and base styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #2d2e6e 0%, #6a4bc6 100%);
+    min-height: 100vh;
+    color: #f5f6fa;
+}
+
+header, footer {
+    text-align: center;
+    padding: 1.5rem 0;
+    background: rgba(30, 30, 60, 0.7);
+    box-shadow: 0 2px 8px rgba(40, 40, 80, 0.1);
+}
+
+h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    color: #e0e7ff;
+}
+
+main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem 1rem 3rem 1rem;
+}
+
+.chess-piece {
+    background: rgba(44, 47, 94, 0.93);
+    border-radius: 1.2rem;
+    box-shadow: 0 6px 24px 0 rgba(60, 40, 120, 0.18);
+    padding: 2rem 1.5rem;
+    width: 320px;
+    min-height: 260px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.3s, border 0.3s;
+    border: 3px solid transparent;
+    z-index: 1;
+}
+
+.chess-piece h2 {
+    margin-top: 0;
+    color: #a7bfff;
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+}
+
+.chess-piece p {
+    font-size: 1.07rem;
+    line-height: 1.6;
+    margin-bottom: 0.7rem;
+}
+
+footer {
+    font-size: 1rem;
+    color: #b3b3e6;
+    background: rgba(30, 30, 60, 0.7);
+    border-top: 1px solid #3a3a7a;
+}
+
+/* Highlight effect for JS */
+.chess-piece.highlight {
+    border: 3px solid #7f7fff;
+    box-shadow: 0 0 32px 0 #7f7fff99, 0 6px 24px 0 rgba(60, 40, 120, 0.18);
+    z-index: 2;
+}
+
+/* Animated background overlay for JS */
+.chess-piece .animated-bg {
+    position: absolute;
+    top: -40%;
+    left: -40%;
+    width: 180%;
+    height: 180%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.25;
+    background: radial-gradient(circle at 60% 40%, #a7bfff 0%, #6a4bc6 60%, transparent 100%);
+    animation: move-bg 6s linear infinite alternate;
+}
+
+@keyframes move-bg {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.18;
+    }
+    50% {
+        transform: translate(10%, 10%) scale(1.08);
+        opacity: 0.32;
+    }
+    100% {
+        transform: translate(-10%, -10%) scale(1.12);
+        opacity: 0.18;
+    }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    main {
+        gap: 1.2rem;
+    }
+    .chess-piece {
+        width: 90vw;
+        max-width: 400px;
+    }
+}

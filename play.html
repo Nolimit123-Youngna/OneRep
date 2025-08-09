@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chess vs AI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(8, 60px);
+      grid-template-rows: repeat(8, 60px);
+      margin: 32px auto 20px auto;
+      border: 3px solid #333;
+      box-shadow: 0 8px 32px 0 #4b3b7a44;
+      background: rgba(255,255,255,0.07);
+      border-radius: 12px;
+      width: 480px;
+    }
+    .square {
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
+      text-align: center;
+      font-size: 32px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+      position: relative;
+    }
+    .light {
+      background-color: #e9e9f6;
+    }
+    .dark {
+      background-color: #b1a7d6;
+    }
+    .square.selected {
+      outline: 3px solid #ffda79;
+      z-index: 2;
+    }
+    .square.move-target {
+      background: #ffe066;
+      box-shadow: 0 0 0 3px #ffda79 inset;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 24px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: none;
+      background: #667eea;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #4b3b7a33;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #764ba2;
+    }
+    h1 {
+      color: #fff;
+      margin-top: 32px;
+      text-shadow: 0 2px 8px #4b3b7a55;
+    }
+    #status {
+      color: #fff;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      min-height: 1.5em;
+      text-shadow: 0 1px 4px #4b3b7a33;
+    }
+  </style>
+</head>
+<body>
+  <h1>Play Chess vs AI</h1>
+  <div id="status"></div>
+  <div id="board"></div>
+  <button onclick="resetGame()">Reset Game</button>
+
+  <!-- Chess.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.0.0/chess.min.js"></script>
+  <script>
+    let game; // Declare at top so it's accessible everywhere
+    const boardEl = document.getElementById("board");
+    const statusEl = document.getElementById("status");
+    const engine = new Worker("stockfish.js"); // Make sure this file is in the same folder
+    let selectedSquare = null;
+
+    function initGame() {
+      game = new Chess(); // Initialize here
+      createBoard();
+      updateStatus();
+    }
+
+    function createBoard() {
+      boardEl.innerHTML = "";
+      const board = game.board();
+      for (let r = 7; r >= 0; r--) {
+        for (let c = 0; c < 8; c++) {
+          const square = document.createElement("div");
+          square.className = "square " + ((r + c) % 2 === 0 ? "light" : "dark");
+          square.dataset.row = r;
+          square.dataset.col = c;
+          const piece = board[r][c];
+          square.textContent = piece ? getUnicode(piece) : "";
+          square.onclick = () => handleClick(r, c);
+          boardEl.appendChild(square);
+        }
+      }
+      updateStatus();
+    }
+
+    function getUnicode(piece) {
+      const symbols = {
+        p: "♟", r: "♜", n: "♞", b: "♝", q: "♛", k: "♚",
+        P: "♙", R: "♖", N: "♘", B: "♗", Q: "♕", K: "♔"
+      };
+      return symbols[piece.color === "w" ? piece.type.toUpperCase() : piece.type];
+    }
+
+    function handleClick(row, col) {
+      if (game.game_over()) return;
+      const square = "abcdefgh"[col] + (row + 1);
+      const piece = game.get(square);
+
+      if (!selectedSquare) {
+        // Select only if it's player's (white's) piece
+        if (piece && piece.color === "w") {
+          selectedSquare = square;
+        }
+      } else {
+        const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
+        selectedSquare = null;
+        if (move) {
+          createBoard();
+          setTimeout(() => makeAIMove(), 500);
+        } else {
+          // If clicked another own piece, select it
+          if (piece && piece.color === "w") {
+            selectedSquare = square;
+          }
+        }
+      }
+      createBoard();
+    }
+
+    function makeAIMove() {
+      if (game.game_over()) return;
+      engine.postMessage("position fen " + game.fen());
+      engine.postMessage("go depth 15");
+    }
+
+    engine.onmessage = function (e) {
+      if (e.data.startsWith("bestmove")) {
+        const move = e.data.split(" ")[1];
+        if (move && move !== "(none)") {
+          game.move(move, { sloppy: true });
+          createBoard();
+        }
+      }
+    };
+
+    function updateStatus() {
+      if (!statusEl) return;
+      if (game.in_checkmate()) {
+        statusEl.textContent = "Checkmate! " + (game.turn() === "w" ? "Black" : "White") + " wins.";
+      } else if (game.in_draw()) {
+        statusEl.textContent = "Draw!";
+      } else if (game.in_check()) {
+        statusEl.textContent = (game.turn() === "w" ? "White" : "Black") + " is in check.";
+      } else {
+        statusEl.textContent = (game.turn() === "w" ? "White" : "Black") + "'s turn.";
+      }
+    }
+
+    function resetGame() {
+      game.reset();
+      selectedSquare = null;
+      createBoard();
+    }
+
+    // Initialize everything once the page loads
+    window.onload = initGame;
+  </script>
+</body>
+</html>
