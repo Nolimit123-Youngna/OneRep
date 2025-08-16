@@ -2,455 +2,191 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Chess Portal</title>
+  <title>Chess vs AI</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      text-align: center;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      background-attachment: fixed;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
     }
-
-    /* Floating Bubbles */
-    .bubble {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      pointer-events: none;
-      animation: float 6s ease-in-out infinite;
-    }
-
-    .bubble:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-delay: 0s; }
-    .bubble:nth-child(2) { width: 60px; height: 60px; left: 20%; animation-delay: 1s; }
-    .bubble:nth-child(3) { width: 100px; height: 100px; left: 35%; animation-delay: 2s; }
-    .bubble:nth-child(4) { width: 40px; height: 40px; left: 50%; animation-delay: 3s; }
-    .bubble:nth-child(5) { width: 70px; height: 70px; left: 65%; animation-delay: 4s; }
-    .bubble:nth-child(6) { width: 90px; height: 90px; left: 80%; animation-delay: 5s; }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
-    }
-
-    /* Header */
-    header {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 1rem 2rem;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: rgba(255, 255, 255, 0.9);
-      text-decoration: none;
-      font-weight: 500;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      transition: all 0.3s ease;
-    }
-
-    .nav-links a:hover {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      transform: translateY(-2px);
-    }
-
-    /* Main Content */
-    main {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4rem 2rem;
-      position: relative;
-    }
-
-    .hero-content {
-      text-align: center;
-      z-index: 10;
-    }
-
-    .hero-title {
-      font-size: 3.5rem;
-      font-weight: 700;
-      color: white;
-      margin-bottom: 1rem;
-      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-subtitle {
-      font-size: 1.2rem;
-      color: rgba(255, 255, 255, 0.8);
-      margin-bottom: 3rem;
-      font-weight: 300;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 2rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .glass-btn {
-      font-family: 'SF Pro Display', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: white;
-      padding: 1rem 2.5rem;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      outline: none;
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      overflow: hidden;
-    }
-
-    .glass-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .glass-btn:hover::before {
-      left: 100%;
-    }
-
-    .glass-btn.primary {
-      background: rgba(0, 122, 255, 0.3);
-      border-color: rgba(0, 122, 255, 0.5);
-    }
-
-    .glass-btn.secondary {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    .glass-btn:hover {
-      transform: translateY(-4px);
-      box-shadow: 
-        0 16px 40px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-
-    .glass-btn:active {
-      transform: translateY(-2px);
-    }
-
-    /* Footer */
-    footer {
-      background: rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 2rem;
-      margin-top: auto;
-    }
-
-    .footer-content {
-      max-width: 1200px;
-      margin: 0 auto;
+    #board {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(8, 60px);
+      grid-template-rows: repeat(8, 60px);
+      margin: 32px auto 20px auto;
+      border: 3px solid #333;
+      box-shadow: 0 8px 32px 0 #4b3b7a44;
+      background: rgba(255,255,255,0.07);
+      border-radius: 12px;
+      width: 480px;
     }
-
-    .footer-section h3 {
-      color: white;
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-    }
-
-    .footer-section ul {
-      list-style: none;
-    }
-
-    .footer-section ul li {
-      margin-bottom: 0.5rem;
-    }
-
-    .footer-section a {
-      color: rgba(255, 255, 255, 0.7);
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-
-    .footer-section a:hover {
-      color: white;
-    }
-
-    .footer-bottom {
+    .square {
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
       text-align: center;
-      margin-top: 2rem;
-      padding-top: 2rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.9rem;
+      font-size: 32px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+      position: relative;
     }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .header-content {
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .nav-links {
-        gap: 1rem;
-      }
-
-      .hero-title {
-        font-size: 2.5rem;
-      }
-
-      .button-group {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .glass-btn {
-        width: 250px;
-      }
+    .light {
+      background-color: #e9e9f6;
+    }
+    .dark {
+      background-color: #b1a7d6;
+    }
+    .square.selected {
+      outline: 3px solid #ffda79;
+      z-index: 2;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 24px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: none;
+      background: #667eea;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #4b3b7a33;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #764ba2;
+    }
+    h1 {
+      color: #fff;
+      margin-top: 32px;
+      text-shadow: 0 2px 8px #4b3b7a55;
+    }
+    #status {
+      color: #fff;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      min-height: 1.5em;
+      text-shadow: 0 1px 4px #4b3b7a33;
     }
   </style>
 </head>
 <body>
-  <!-- Floating Bubbles -->
-  <div class="bubble"></div>
-  <div class="bubble"></div>
-  <div class="bubble"></div>
-  <div class="bubble"></div>
-  <div class="bubble"></div>
-  <div class="bubble"></div>
+  <h1>Play Chess vs AI</h1>
+  <div id="status"></div>
+  <div id="board"></div>
+  <button onclick="resetGame()">Reset Game</button>
 
-  <!-- Header -->
-  <header>
-    <div class="header-content">
-      <div class="logo">♔ ChessPortal</div>
-      <nav>
-        <ul class="nav-links">
-          <li><a href="#home">Home</a></li>
-          <li><a href="#play">Play</a></li>
-          <li><a href="#learn">Learn</a></li>
-          <li><a href="#tournaments">Tournaments</a></li>
-          <li><a href="#profile">Profile</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Main Content -->
-  <main>
-    <div class="hero-content">
-      <h1 class="hero-title">Master the Art of Chess</h1>
-      <p class="hero-subtitle">Experience chess like never before with our beautiful, intuitive platform</p>
-      
-      <div class="button-group">
-        <button class="glass-btn primary" id="play-btn">
-          <span>Play Chess Now</span>
-        </button>
-        <button class="glass-btn secondary" id="learn-btn">
-          <span>Learn Chess</span>
-        </button>
-      </div>
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer>
-    <div class="footer-content">
-      <div class="footer-section">
-        <h3>Play</h3>
-        <ul>
-          <li><a href="#quick-game">Quick Game</a></li>
-          <li><a href="#tournaments">Tournaments</a></li>
-          <li><a href="#puzzles">Daily Puzzles</a></li>
-          <li><a href="#variants">Chess Variants</a></li>
-        </ul>
-      </div>
-      <div class="footer-section">
-        <h3>Learn</h3>
-        <ul>
-          <li><a href="#basics">Chess Basics</a></li>
-          <li><a href="#strategies">Strategies</a></li>
-          <li><a href="#openings">Opening Guide</a></li>
-          <li><a href="#endgames">Endgame Tactics</a></li>
-        </ul>
-      </div>
-      <div class="footer-section">
-        <h3>Community</h3>
-        <ul>
-          <li><a href="#forums">Forums</a></li>
-          <li><a href="#clubs">Chess Clubs</a></li>
-          <li><a href="#leaderboard">Leaderboard</a></li>
-          <li><a href="#friends">Find Friends</a></li>
-        </ul>
-      </div>
-      <div class="footer-section">
-        <h3>Support</h3>
-        <ul>
-          <li><a href="#help">Help Center</a></li>
-          <li><a href="#contact">Contact Us</a></li>
-          <li><a href="#bug-report">Report Bug</a></li>
-          <li><a href="#feedback">Feedback</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2025 ChessPortal. All rights reserved. | Privacy Policy | Terms of Service</p>
-    </div>
-  </footer>
+  <!-- Load chess.js FIRST -->
+  <script src="https://cdn.jsdelivr.net/npm/chess.js@0.13.4/chess.min.js"></script>
 
   <script>
-    // Enhanced button interactions
-    document.querySelectorAll('.glass-btn').forEach(btn => {
-      btn.addEventListener('mouseenter', () => {
-        btn.style.transform = 'translateY(-4px) scale(1.02)';
-      });
+    const NGROK_URL = "https://3773ed13fe24.ngrok-free.app"; // Replace each time Colab restarts
 
-      btn.addEventListener('mouseleave', () => {
-        btn.style.transform = 'translateY(0) scale(1)';
-      });
-    });
+    let game;
+    const boardEl = document.getElementById("board");
+    const statusEl = document.getElementById("status");
+    let selectedSquare = null;
 
-    // Button click handlers
-    document.getElementById('play-btn').addEventListener('click', function(event) {
-      // Add ripple effect
-      createRipple(this, event);
-      window.location.href = 'play.html';
-    });
-
-    document.getElementById('learn-btn').addEventListener('click', function() {
-      // Add ripple effect
-      createRipple(this, event);
-      window.location.href = 'learn.html';
-    });
-
-    // Ripple effect function
-    function createRipple(button, event) {
-      const ripple = document.createElement('span');
-      const rect = button.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      const x = event.clientX - rect.left - size / 2;
-      const y = event.clientY - rect.top - size / 2;
-      
-      ripple.style.cssText = `
-        position: absolute;
-        width: ${size}px;
-        height: ${size}px;
-        left: ${x}px;
-        top: ${y}px;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        transform: scale(0);
-        animation: ripple 0.6s linear;
-        pointer-events: none;
-      `;
-      
-      button.appendChild(ripple);
-      
-      setTimeout(() => {
-        ripple.remove();
-      }, 600);
+    function initGame() {
+      game = new Chess();
+      createBoard();
+      updateStatus();
     }
 
-    // Add ripple animation keyframes
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes ripple {
-        to {
-          transform: scale(4);
-          opacity: 0;
+    function createBoard() {
+      boardEl.innerHTML = "";
+      const board = game.board();
+      for (let r = 7; r >= 0; r--) {
+        for (let c = 0; c < 8; c++) {
+          const square = document.createElement("div");
+          square.className = "square " + ((r + c) % 2 === 0 ? "light" : "dark");
+          const piece = board[r][c];
+          square.textContent = piece ? getUnicode(piece) : "";
+          square.onclick = () => handleClick(r, c);
+          boardEl.appendChild(square);
         }
       }
-    `;
-    document.head.appendChild(style);
-
-    // Dynamic bubble creation
-    function createBubble() {
-      const bubble = document.createElement('div');
-      bubble.classList.add('bubble');
-      bubble.style.left = Math.random() * 100 + '%';
-      bubble.style.width = bubble.style.height = Math.random() * 60 + 40 + 'px';
-      bubble.style.animationDelay = Math.random() * 2 + 's';
-      bubble.style.animationDuration = Math.random() * 3 + 4 + 's';
-      document.body.appendChild(bubble);
-      
-      setTimeout(() => {
-        bubble.remove();
-      }, 8000);
     }
 
-    // Create new bubbles periodically
-    setInterval(createBubble, 3000);
+    function getUnicode(piece) {
+      const symbols = {
+        p: "♟", r: "♜", n: "♞", b: "♝", q: "♛", k: "♚",
+        P: "♙", R: "♖", N: "♘", B: "♗", Q: "♕", K: "♔"
+      };
+      return symbols[piece.color === "w" ? piece.type.toUpperCase() : piece.type];
+    }
 
-    // Add smooth scrolling for navigation links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
+    function handleClick(row, col) {
+      if (game.game_over()) return;
+      const square = "abcdefgh"[col] + (row + 1);
+      const piece = game.get(square);
+
+      if (!selectedSquare) {
+        if (piece && piece.color === "w") {
+          selectedSquare = square;
         }
-      });
-    });
+      } else {
+        const move = game.move({ from: selectedSquare, to: square, promotion: "q" });
+        selectedSquare = null;
+        if (move) {
+          createBoard();
+          updateStatus();
+          setTimeout(makeAIMove, 200);
+        } else {
+          if (piece && piece.color === "w") {
+            selectedSquare = square;
+          }
+        }
+      }
+    }
+
+    async function makeAIMove() {
+      if (game.game_over()) return;
+      const moves = game.history({ verbose: false });
+      try {
+        const res = await fetch(`${NGROK_URL}/move`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ moves })
+        });
+        const data = await res.json();
+        if (data.best_move) {
+          game.move({
+            from: data.best_move.slice(0, 2),
+            to: data.best_move.slice(2, 4),
+            promotion: "q"
+          });
+          createBoard();
+          updateStatus();
+        }
+      } catch (err) {
+        console.error("AI request failed:", err);
+      }
+    }
+
+    function updateStatus() {
+      if (game.in_checkmate()) {
+        statusEl.textContent = "Checkmate! " + (game.turn() === "w" ? "Black" : "White") + " wins.";
+      } else if (game.in_draw()) {
+        statusEl.textContent = "Draw!";
+      } else if (game.in_check()) {
+        statusEl.textContent = (game.turn() === "w" ? "White" : "Black") + " is in check.";
+      } else {
+        statusEl.textContent = (game.turn() === "w" ? "White" : "Black") + "'s turn.";
+      }
+    }
+
+    function resetGame() {
+      game.reset();
+      selectedSquare = null;
+      createBoard();
+      updateStatus();
+    }
+
+    window.onload = initGame;
   </script>
 </body>
 </html>
